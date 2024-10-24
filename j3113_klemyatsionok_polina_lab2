@@ -1,0 +1,103 @@
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <sstream>
+#include <string>
+
+using namespace std;
+
+int main() {
+  int n;
+  cout << "Введите количество элементов в массиве: ";
+  cin >> n;
+
+  // Удаление символа перевода строки из входного потока
+  cin.ignore();
+
+  // Создание вектора для хранения элементов массива
+  vector<int> arr(n);
+
+  // Ввод элементов массива через запятую
+  string input;
+  cout << "Введите элементы массива через запятую: ";
+  getline(cin, input);
+
+  // Разделение строки на элементы
+  stringstream ss(input);
+  string element;
+  int i = 0;
+  while (getline(ss, element, ',')) {
+    arr[i++] = stoi(element);
+  }
+
+  // Генерация случайных чисел
+  random_device rd;
+  mt19937 g(rd());
+
+  // Перемешивание элементов вектора
+  shuffle(arr.begin(), arr.end(), g);
+
+  // Вывод перемешанного массива
+  cout << "Перемешанный массив:" << endl;
+  for (int i = 0; i < n; i++) {
+    cout << arr[i] << " ";
+  }
+  cout << endl;
+
+  return 0;
+}
+
+
+
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <cassert>
+
+using namespace std;
+
+// Тестовая функция
+void testShuffle(const vector<int>& input, const vector<int>& expected) {
+  // Создаем копию входного массива
+  vector<int> arr = input;
+
+  // Генерация случайных чисел
+  random_device rd;
+  mt19937 g(rd());
+
+  // Перемешивание элементов вектора
+  shuffle(arr.begin(), arr.end(), g);
+
+  // Проверка, что все элементы присутствуют в перемешанном массиве
+  assert(arr.size() == expected.size());
+  for (int i = 0; i < arr.size(); i++) {
+    assert(find(arr.begin(), arr.end(), expected[i]) != arr.end());
+  }
+}
+
+int main() {
+  // Тест1: Пустой массив
+  vector<int> empty;
+  testShuffle(empty, empty);
+
+  // Тест2: Массив с одним элементом
+  vector<int> one_element = {1};
+  testShuffle(one_element, one_element);
+
+  // Тест3: Массив с несколькими элементами
+  vector<int> multiple_elements = {1, 2, 3, 4, 5};
+  testShuffle(multiple_elements, multiple_elements);
+
+  // Тест4: Массив с повторяющимися элементами
+  vector<int> repeated_elements = {1, 1, 2, 2, 3};
+  testShuffle(repeated_elements, repeated_elements);
+
+  cout << "Все тесты пройдены успешно!" << endl;
+
+  return 0;
+}
