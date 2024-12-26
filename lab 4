@@ -1,0 +1,147 @@
+#include <iostream> // библиотека ввода-вывода для рабоыт с cout и cin
+#include <vector> // библиотека для работы с динамическими массивами
+#include <set> // библиотека для работы с множествами set(те самые, который автоматически упорядоченны и не содержат дубликатов)
+#include <algorithm> //был другой вариант кода, тут она не используется
+#include <limits> // библиотека, которая предоставляет доступ к константам(предельные значения различных типов данных)
+
+using namespace std; //объявление пространства имен std(cтандартная)
+
+// Функция для проверки, покрывает ли текущая комбинация множеств все элементы множества A
+bool isCovered(const set<int>& universe, const vector<set<int>>& subsets, const vector<int>& selected) {  //возвращает true если все элементы подмножества покрывают universe
+    set<int> covered; // создаем пустое множество covered , будем добавлять туда элементы из выбранных подмножеств
+    for (int index : selected) { // перебериает индексы выбранных подмножеств
+        covered.insert(subsets[index].begin(), subsets[index].end()); // в множество covered добавляем все элементы из подмножества subsets
+    }
+    return covered == universe; // возвращем true если covered и universe идентичны
+}
+
+// Функция для поиска минимального покрытия(перебирает все комбинации множеств)
+vector<int> findMinCover(const set<int>& universe, const vector<set<int>>& subsets) { // возвращает вектор индексов выбранных подмножеств
+    int n = subsets.size(); // переменная, определяющая количество подмножеств
+    vector<int> bestCombination; // массив для хранения индексов 'лучшей' комбинации
+    int minSets = numeric_limits<int>::max(); // переменная, используемая для отслеживания минимального количества множеств в покрытии
+
+    // Перебор всех возможных комбинаций множеств (полный перебор)
+    for (int mask = 1; mask < (1 << n); ++mask) { // цикл, который перебирает все возможные комбинации подмножеств с помощью битовых масок
+        vector<int> selected;
+        for (int i = 0; i < n; ++i) {
+            if (mask & (1 << i)) { // проверка на то, что установлен ли iый бит в маске, если да, то iое подмножество включается в selected
+                selected.push_back(i);
+            }
+        }
+
+        // Проверяем, покрывает ли выбранная комбинация все элементы множества A
+        if (isCovered(universe, subsets, selected)) { // вызывает функцию для проверки, покрывает ли текущая комбинация множеств universe
+            if (selected.size() < minSets) { // если покрытие полное и количесвто выбранных подмножеств меньше текущего минимума, то эььт две переменные обновляюстя
+                minSets = selected.size();
+                bestCombination = selected;
+            }
+        }
+    }
+
+    return bestCombination; // возвращаем массив индековс минимального  покрытия
+}
+
+int main() { // функция для ввода 
+    // Ввод множества A
+    int n;
+    cout << "Введите количество элементов множества A: ";
+    cin >> n;
+
+    set<int> A; // объявляем множество А с элементами типа int
+    cout << "Введите элементы множества A (через пробел): ";
+    for (int i = 0; i < n; ++i) { 
+        int element;
+        cin >> element;
+        A.insert(element); // введеный элемент добавляем в множество А
+    }
+
+    // Ввод множеств B
+    int m;
+    cout << "Введите количество множеств B: ";
+    cin >> m;
+
+    vector<set<int>> B(m); // используем вектор, тк мы используем вложенный цикл
+    for (int i = 0; i < m; ++i) {
+        int k;
+        cout << "Введите количество элементов в множестве B[" << i << "]: ";
+        cin >> k;
+
+        cout << "Введите элементы множества B[" << i << "] (через пробел): ";
+        for (int j = 0; j < k; ++j) {
+            int element;
+            cin >> element;
+            B[i].insert(element);
+        }
+    }
+
+    // Диагностический вывод для проверки
+    cout << "\nПроверка ввода данных:" << endl;
+    cout << "Множество A: ";
+    for (int x : A) cout << x << " ";
+    cout << endl;
+
+    for (int i = 0; i < m; ++i) {
+        cout << "Множество B[" << i << "]: ";
+        for (int x : B[i]) cout << x << " ";
+        cout << endl;
+    }
+
+    // Решаем задачу
+    vector<int> result = findMinCover(A, B); // вызываем функцию, которая ищет минимальное покрытие множества А подмножествами В, сохраняем результат в result
+
+    // Выводим результат
+    cout << "\nМинимальное количество множеств: " << result.size() << endl;
+    cout << "Индексы выбранных множеств: ";
+    for (int index : result) {
+        cout << index << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+
+
+
+// Подсчет памяти
+#include <iostream>
+#include <vector>
+#include <set>
+#include <limits>
+
+using namespace std;
+
+size_t calculateSetMemory(const set<int>& s) { // функция, вычисляющая объем памяти занимаемый множеством set
+    return s.size() * sizeof(int) + s.size() * sizeof(void*); 
+}
+
+size_t calculateVectorMemory(const vector<set<int>>& vec) { // функция, вычисляющая объем памяти,занимаемый вектором множеств
+    size_t total = 0;
+    for (const auto& s : vec) {
+        total += calculateSetMemory(s);
+    }
+    return total + vec.size() * sizeof(set<int>);
+}
+
+int main() {
+    // Пример данных
+    int n = 5;  // количество элементов множества A
+    set<int> A = {1, 2, 3, 4, 5};  // множество A
+
+    int m = 3;  // количество множеств B
+    vector<set<int>> B = {
+        {1, 2}, 
+        {3, 4},
+        {5}
+    };
+
+    // Подсчет памяти для множества A
+    size_t memoryA = calculateSetMemory(A);
+    cout << "Память для множества A: " << memoryA << " байт" << endl;
+
+    // Подсчет памяти для множества B
+    size_t memoryB = calculateVectorMemory(B);
+    cout << "Память для множества B: " << memoryB << " байт" << endl;
+
+    return 0;
+}
