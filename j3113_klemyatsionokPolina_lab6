@@ -1,0 +1,44 @@
+class Solution {
+public:
+    bool canCross(vector<int>& stones) {
+        // Проверяем первый шаг (должен быть на расстоянии 1)
+        if (stones[1] != 1) return false;
+
+        // Создаем хэш-таблицу для хранения допустимых шагов для каждого камня
+        unordered_map<int, unordered_set<int>> dp;
+        for (int stone : stones) {
+            dp[stone] = unordered_set<int>();
+        }
+
+        // Начинаем с первого камня и шага длиной 1
+        dp[1].insert(1);
+
+        // Итерация по каждому камню
+        for (int i = 1; i < stones.size(); ++i) {
+            int stone = stones[i];
+            for (int k : dp[stone]) {
+                // Возможные длины следующего шага
+                for (int step = k - 1; step <= k + 1; ++step) {
+                    if (step > 0 && dp.find(stone + step) != dp.end()) {
+                        dp[stone + step].insert(step);
+                    }
+                }
+            }
+        }
+
+        // Проверяем, есть ли какие-либо шаги для последнего камня
+        return !dp[stones.back()].empty();
+    }
+};
+Пример запуска:
+
+int main() {
+    Solution solution;
+    vector<int> stones1 = {0, 1, 3, 5, 6, 8, 12, 17};
+    vector<int> stones2 = {0, 1, 2, 3, 4, 8, 9, 11};
+
+    cout << solution.canCross(stones1) << endl; // Вывод: true
+    cout << solution.canCross(stones2) << endl; // Вывод: false
+
+    return 0;
+}
